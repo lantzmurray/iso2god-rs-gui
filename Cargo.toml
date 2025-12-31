@@ -5,6 +5,12 @@ description = "A tool to convert between Xbox 360 ISO and Games On Demand file f
 repository = "https://github.com/iliazeus/iso2god-rs"
 edition = "2024"
 
+[workspace]
+members = [
+    ".",
+    "gui",
+]
+
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]

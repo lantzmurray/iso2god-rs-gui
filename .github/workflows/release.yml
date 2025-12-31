@@ -69,11 +69,24 @@ jobs:
           rustup target add ${{ matrix.target }}
           rustup show
 
-      - name: Build
+      - name: Build CLI
         run: |
           cargo build --release --target ${{ matrix.target }} --bin iso2god
           mkdir -p ./out
           mv ./target/${{ matrix.target }}/release/${{ matrix.build_filename }} out/${{ matrix.release_filename }}
+
+      - name: Build GUI
+        run: |
+          cargo build --release --target ${{ matrix.target }} --bin iso2god-gui
+          # Determine GUI binary name based on platform
+          if [ "${{ matrix.runner }}" = "windows-latest" ]; then
+            GUI_BIN="iso2god-gui.exe"
+            GUI_RELEASE="iso2god-gui-x86_64-windows.exe"
+          else
+            GUI_BIN="iso2god-gui"
+            GUI_RELEASE="iso2god-gui-${{ matrix.release_filename#iso2god- }}"
+          fi
+          mv ./target/${{ matrix.target }}/release/$GUI_BIN out/$GUI_RELEASE
 
       - name: Release
         uses: softprops/action-gh-release@v2

@@ -1,0 +1,13 @@
+[package]
+name = "iso2god-gui"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+eframe = "0.29.1"
+rfd = "0.15.0"
+anyhow = "1.0"
+iso2god = { path = ".." }
+rayon = "1.10"
+log = "0.4"
+env_logger = "0.11"
