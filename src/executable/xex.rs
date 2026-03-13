@@ -34,6 +34,7 @@ bitflags! {
 #[derive(Clone, Default, Debug)]
 pub struct XexHeaderFields {
     pub execution_info: Option<TitleExecutionInfo>,
+    pub resource_info: Option<u32>,
     // other fields will be added if and when necessary
 }
 
@@ -123,7 +124,9 @@ impl XexHeader {
                 reader.seek(SeekFrom::Start(header_offset + (value as u64)))?;
                 fields.execution_info = Some(TitleExecutionInfo::from_xex(&mut reader)?);
                 reader.seek(SeekFrom::Start(offset))?;
-            };
+            } else if let Some(Key::ResourceInfo) = key {
+                fields.resource_info = Some(value);
+            }
         }
 
         Ok(XexHeader {
@@ -132,5 +135,50 @@ impl XexHeader {
             certificate_offset,
             fields,
         })
+    }
+
+    pub fn get_icon_resource<R: Read + Seek>(&self, mut reader: R) -> Result<Option<Vec<u8>>, Error> {
+        let resource_offset = match self.fields.resource_info {
+            Some(offset) => offset,
+            None => return Ok(None),
+        };
+
+        reader.seek(SeekFrom::Start(resource_offset as u64))?;
+
+        let count = reader.read_u32::<BE>()?;
+        // Sanity check
+        if count > 10000 {
+            return Ok(None);
+        }
+
+        for _ in 0..count {
+            let mut name_buf = [0u8; 8];
+            reader.read_exact(&mut name_buf)?;
+            let address = reader.read_u32::<BE>()?;
+            let size = reader.read_u32::<BE>()?;
+
+            let name_str = String::from_utf8_lossy(&name_buf);
+            let name = name_str.trim_matches(char::from(0));
+
+            if name == "TitleImage" || name == "Icon" {
+                // Save position
+                let current_pos = reader.stream_position()?;
+
+                // Heuristic: < 256MB is likely file offset
+                if address < 0x10000000 {
+                    reader.seek(SeekFrom::Start(address as u64))?;
+                    let mut data = vec![0u8; size as usize];
+                    reader.read_exact(&mut data)?;
+
+                    if data.starts_with(b"\x89PNG") {
+                        return Ok(Some(data));
+                    }
+                }
+
+                reader.seek(SeekFrom::Start(current_pos))?;
+            }
+        }
+
+        Ok(None)
     }
 }

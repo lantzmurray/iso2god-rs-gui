@@ -93,6 +93,7 @@ fn main() -> Result<(), Error> {
 
     let exe_info = title_info.execution_info;
     let content_type = title_info.content_type;
+    let game_icon = title_info.icon;
 
     {
         let title_id = format!("{:08X}", exe_info.title_id);
@@ -183,7 +184,8 @@ fn main() -> Result<(), Error> {
             last_part_size + (part_count - 1) * god::BLOCK_SIZE * 0xa290,
         )
         .with_content_type(content_type)
-        .with_mht_hash(&mht.digest());
+        .with_mht_hash(&mht.digest())
+        .with_game_icon(game_icon.as_deref());
 
     let game_title = args
         .game_title

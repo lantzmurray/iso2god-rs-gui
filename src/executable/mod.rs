@@ -22,6 +22,7 @@ pub struct TitleExecutionInfo {
 pub struct TitleInfo {
     pub content_type: ContentType,
     pub execution_info: TitleExecutionInfo,
+    pub icon: Option<Vec<u8>>,
 }
 
 impl TitleExecutionInfo {
@@ -66,11 +67,17 @@ impl TitleInfo {
             let execution_info = default_xex_header
                 .fields
                 .execution_info
+                .clone()
                 .context("no execution info in default.xex header")?;
+
+            let icon = default_xex_header
+                .get_icon_resource(&mut executable)
+                .unwrap_or(None);
 
             Ok(TitleInfo {
                 content_type: ContentType::GamesOnDemand,
                 execution_info,
+                icon,
             })
         } else if let Some(mut executable) = iso_image.get_entry(&"\\default.xbe".into())? {
             let default_xbe_header =
@@ -83,6 +90,7 @@ impl TitleInfo {
             Ok(TitleInfo {
                 content_type: ContentType::XboxOriginal,
                 execution_info,
+                icon: None,
             })
         } else {
             bail!("no executable found in this image");

@@ -24,12 +24,19 @@ This fork adds a **graphical user interface (GUI)** to the excellent iso2god-rs 
 - **Multi-threaded conversion** utilizing all available CPU cores
 - **Error handling** with clear error messages and success notifications
 
+### Game Icon Features
+- **Automatic Icon Extraction**: Extracts game icon directly from XEX/XBE file and embeds it into GOD package
+- **Icons visible in Xbox 360 dashboards** like Freestyle Dash and Aurora
+- **Increased icon size limit** from 1KB to 16KB to support higher-quality game icons
+
 ### Technical Implementation
 - Built with **eframe/egui** for cross-platform GUI support
 - Uses **rfd** for native file picker dialogs
 - Thread-safe status management with `Arc<Mutex>`
 - Same conversion logic as the CLI tool, running in background threads
 - Supports Linux, macOS, and Windows
+- Automatic icon extraction from XEX/XBE executables
+- Support for icon sizes up to 16KB
 
 ## Installation
 
